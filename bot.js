@@ -11,18 +11,23 @@ venom
     session: "whatsapp-session",
     multidevice: true,
     headless: true,
-    useChrome: false, // Jangan pakai Chrome bawaan Puppeteer
+    useChrome: false,
     browserArgs: [
       "--no-sandbox",
       "--disable-setuid-sandbox",
       "--disable-dev-shm-usage",
       "--disable-accelerated-2d-canvas",
       "--disable-gpu",
+      "--disable-extensions",
     ],
     puppeteerOptions: {
-      executablePath: "/usr/bin/google-chrome-stable", // Gunakan Chromium dari OS Railway
+      args: ["--no-sandbox", "--disable-setuid-sandbox"],
+      executablePath: process.env.CHROME_PATH || require("puppeteer").executablePath(),
     },
   })
+  .then((client) => start(client))
+  .catch((error) => console.log("❌ ERROR:", error));
+
 
   .then((client) => start(client))
   .catch((error) => console.log("❌ ERROR:", error));
