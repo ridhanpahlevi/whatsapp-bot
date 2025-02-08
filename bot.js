@@ -5,12 +5,21 @@ require("dotenv").config();
 const GOOGLE_SHEET_WEBHOOK =
   "https://script.google.com/macros/s/AKfycbzdpICl0zSzSi2fWiz5X5FC2oml3_TIveJCfBSmgkmyo9hIFkRSwKo2SDojghPleLCbXA/exec"; // Ganti dengan URL Apps Script
 
+// Cek apakah kita menggunakan Koyeb atau bukan
+const isKoyeb = process.env.KOYEB === "true";
+
 // Buat sesi WhatsApp bot
 venom
   .create({
     session: "whatsapp-session",
     headless: true,
-    browserArgs: ["--no-sandbox", "--disable-setuid-sandbox"],
+    browserArgs: [
+      "--no-sandbox",
+      "--disable-setuid-sandbox",
+      "--disable-gpu",
+      "--disable-software-rasterizer",
+    ],
+    useChrome: true, // Pastikan kita menggunakan Chrome agar lebih kompatibel
   })
   .then((client) => start(client))
   .catch((error) => console.log("❌ ERROR:", error));
@@ -75,4 +84,13 @@ function start(client) {
       await sendToGoogleSheets(client, message);
     }
   });
+
+  console.log("✅ Bot is running!");
+}
+
+// Cek dan pastikan file .env sudah ada pada environment Koyeb
+if (isKoyeb) {
+  console.log("🚀 Running on Koyeb Cloud...");
+} else {
+  console.log("👨‍💻 Running locally...");
 }
