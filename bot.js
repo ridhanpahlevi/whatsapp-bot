@@ -17,7 +17,6 @@ venom
 
 async function sendToGoogleSheets(client, message) {
   try {
-    aa;
     if (!message.body.startsWith("#")) return;
 
     const keluhanText = message.body.substring(1).trim();
