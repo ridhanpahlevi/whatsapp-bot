@@ -1,20 +1,30 @@
-const venom = require("venom-bot");
 const puppeteer = require("puppeteer");
+const venom = require("venom-bot");
 const axios = require("axios");
 require("dotenv").config();
 
-const GOOGLE_SHEET_WEBHOOK =
-  "https://script.google.com/macros/s/AKfycbzdpICl0zSzSi2fWiz5X5FC2oml3_TIveJCfBSmgkmyo9hIFkRSwKo2SDojghPleLCbXA/exec"; // Ganti dengan URL Apps Script
+// URL Apps Script Google Sheets (disimpan dalam environment variable)
+const GOOGLE_SHEET_WEBHOOK = process.env.GOOGLE_SHEET_WEBHOOK;
+if (!GOOGLE_SHEET_WEBHOOK) {
+  console.error("❌ ERROR: GOOGLE_SHEET_WEBHOOK tidak ditemukan!");
+  process.exit(1);
+}
 
-const isKoyeb = process.env.KOYEB === "true"; // Deteksi jika running di Koyeb
+// Deteksi apakah running di Koyeb
+const isKoyeb = process.env.KOYEB === "true";
+
+// Path ke Chromium
+const executablePath =
+  process.env.CHROME_BIN || "/usr/bin/google-chrome-stable";
 
 (async () => {
   try {
     console.log("🔄 Menjalankan Puppeteer...");
 
+    // Menjalankan browser Puppeteer
     const browser = await puppeteer.launch({
-      headless: true,
-      executablePath: process.env.CHROME_BIN || "/usr/bin/chromium-browser",
+      headless: "new",
+      executablePath,
       args: [
         "--no-sandbox",
         "--disable-setuid-sandbox",
@@ -24,22 +34,26 @@ const isKoyeb = process.env.KOYEB === "true"; // Deteksi jika running di Koyeb
       ],
     });
 
-    const browserWSEndpoint = browser.wsEndpoint();
-    console.log("✅ Puppeteer Siap:", browserWSEndpoint);
+    console.log("✅ Puppeteer Siap:", browser.wsEndpoint());
 
+    // Menjalankan Venom Bot
     venom
       .create({
         session: "whatsapp-session",
         headless: "new",
-        browserPath: process.env.CHROME_BIN || "/usr/bin/chromium-browser",
+        browserPath: executablePath,
         browserArgs: [
           "--no-sandbox",
           "--disable-setuid-sandbox",
           "--disable-dev-shm-usage",
           "--disable-gpu",
           "--disable-software-rasterizer",
+          "--disable-background-timer-throttling",
+          "--disable-backgrounding-occluded-windows",
+          "--disable-renderer-backgrounding",
+          "--use-gl=swiftshader",
         ],
-        useChrome: false, // Jangan pakai Chrome bawaan sistem
+        useChrome: false,
       })
       .then((client) => start(client))
       .catch((error) => console.log("❌ ERROR:", error));
@@ -78,6 +92,7 @@ async function sendToGoogleSheets(client, message) {
 
     const response = await axios.post(GOOGLE_SHEET_WEBHOOK, data, {
       headers: { "Content-Type": "application/json" },
+      httpsAgent: new (require("https").Agent)({ rejectUnauthorized: false }),
     });
 
     console.log("✅ Respon dari Google Sheets:", response.data);

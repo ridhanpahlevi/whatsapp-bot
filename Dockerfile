@@ -1,22 +1,32 @@
-# Gunakan image yang kompatibel dengan Puppeteer
-FROM node:20
+# Gunakan Node.js versi terbaru
+FROM node:18
 
-# Install dependencies untuk Puppeteer & Chrome
-RUN apt-get update && apt-get install -y wget curl unzip \
-    libnss3 libatk1.0-0 libatk-bridge2.0-0 \
-    libcups2 libxkbcommon-x11-0 libxcomposite1 \
-    libxrandr2 libgbm-dev libpangocairo-1.0-0 \
-    libasound2 libpango-1.0-0 libgtk-3-0 
-
-# Set working directory
+# Set work directory
 WORKDIR /app
 
-# Copy project files
-COPY package.json package-lock.json ./
-RUN npm install
-
-# Copy seluruh project
+# Copy semua file ke container
 COPY . .
 
-# Jalankan bot
+# Install dependencies
+RUN npm install
+
+# Install Puppeteer dependencies
+RUN apt-get update && apt-get install -y \
+    libnss3 \
+    libatk1.0-0 \
+    libx11-xcb1 \
+    libxcomposite1 \
+    libxcursor1 \
+    libxdamage1 \
+    libxext6 \
+    libxfixes3 \
+    libxi6 \
+    libxrandr2 \
+    libxrender1 \
+    libdbus-glib-1-2 \
+    libasound2 \
+    libgbm-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Jalankan Bot
 CMD ["node", "bot.js"]
