@@ -13,9 +13,8 @@ if (!GOOGLE_SHEET_WEBHOOK) {
 // Deteksi apakah running di Koyeb
 const isKoyeb = process.env.KOYEB === "true";
 
-// Menentukan executablePath untuk Puppeteer, jika tidak ada, pakai default
-const executablePath =
-  puppeteer.executablePath() || "/usr/bin/chromium-browser"; // Ganti dengan path jika di Koyeb
+// Tentukan path ke executable Chromium
+const executablePath = process.env.CHROME_BIN || "/usr/bin/chromium-browser"; // Pastikan path ini benar
 
 (async () => {
   try {
