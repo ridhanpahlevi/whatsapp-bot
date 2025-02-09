@@ -1,34 +1,35 @@
-FROM node:16
+FROM node:18-slim
 
-# Install dependencies for Puppeteer
+# Install dependencies
 RUN apt-get update && apt-get install -y \
-  wget \
-  ca-certificates \
-  fonts-liberation \
-  libappindicator3-1 \
-  libasound2 \
-  libatk-bridge2.0-0 \
-  libatk1.0-0 \
-  libcups2 \
-  libdbus-1-3 \
-  libgdk-pixbuf2.0-0 \
-  libnspr4 \
-  libnss3 \
-  libx11-xcb1 \
-  libxcomposite1 \
-  libxdamage1 \
-  libxrandr2 \
-  xdg-utils \
-  --no-install-recommends
+    chromium \
+    fonts-liberation \
+    libappindicator3-1 \
+    libasound2 \
+    libatk-bridge2.0-0 \
+    libatk1.0-0 \
+    libcups2 \
+    libdbus-1-3 \
+    libgdk-pixbuf2.0-0 \
+    libnspr4 \
+    libnss3 \
+    libx11-xcb1 \
+    libxcomposite1 \
+    libxdamage1 \
+    libxrandr2 \
+    xdg-utils \
+    --no-install-recommends \
+    && rm -rf /var/lib/apt/lists/*
 
-# Install Puppeteer
-RUN npm install puppeteer
+# Set environment variable for Chromium path
+ENV CHROME_BIN=/usr/bin/chromium
 
-# Copy project files
-COPY . /app
+# Install your node modules
+WORKDIR /workspace
+COPY package*.json ./
+RUN npm install
 
-# Set the working directory
-WORKDIR /app
+# Copy other files
+COPY . .
 
-# Start the application
-CMD ["node", "bot.js"]
+CMD ["npm", "start"]
