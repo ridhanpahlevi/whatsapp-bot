@@ -12,15 +12,18 @@ const isKoyeb = process.env.KOYEB === "true";
 venom
   .create({
     session: "whatsapp-session",
-    headless: true,
+    headless: "new", // Pakai mode headless baru
+    browserPathExecutable: "/usr/bin/chromium-browser",
     browserArgs: [
       "--no-sandbox",
       "--disable-setuid-sandbox",
+      "--disable-dev-shm-usage",
       "--disable-gpu",
       "--disable-software-rasterizer",
     ],
-    useChrome: true, // Pastikan kita menggunakan Chrome agar lebih kompatibel
+    useChrome: false, // Gunakan Chromium dari sistem, bukan Chrome dari Windows
   })
+
   .then((client) => start(client))
   .catch((error) => console.log("❌ ERROR:", error));
 
