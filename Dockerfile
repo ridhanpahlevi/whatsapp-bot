@@ -1,14 +1,14 @@
 # Gunakan Node.js versi terbaru
 FROM node:18
 
-# Set environment variable untuk Puppeteer
+# Set environment untuk Puppeteer
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
     PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 
 # Set work directory
 WORKDIR /app
 
-# Copy package.json dan package-lock.json sebelum copy semua file
+# Copy package.json dulu untuk caching lebih efisien
 COPY package*.json ./
 
 # Install dependencies
@@ -37,4 +37,4 @@ RUN apt-get update && apt-get install -y \
 COPY . .
 
 # Jalankan Bot
-CMD ["node", "bot.js"]
+CMD ["node", "/app/bot.js"]
