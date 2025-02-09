@@ -1,6 +1,6 @@
 FROM node:18-slim
 
-# Install dependencies
+# Install dependencies untuk Chromium
 RUN apt-get update && apt-get install -y \
     chromium \
     fonts-liberation \
@@ -21,15 +21,16 @@ RUN apt-get update && apt-get install -y \
     --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
-# Set environment variable for Chromium path
+# Set environment variable untuk path Chromium
 ENV CHROME_BIN=/usr/bin/chromium
 
-# Install your node modules
+# Install node modules
 WORKDIR /workspace
 COPY package*.json ./
 RUN npm install
 
-# Copy other files
+# Salin semua file ke dalam container
 COPY . .
 
+# Set entry point untuk aplikasi
 CMD ["npm", "start"]

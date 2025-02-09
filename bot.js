@@ -7,7 +7,7 @@ require("dotenv").config();
 const GOOGLE_SHEET_WEBHOOK = process.env.GOOGLE_SHEET_WEBHOOK;
 if (!GOOGLE_SHEET_WEBHOOK) {
   console.error("❌ ERROR: GOOGLE_SHEET_WEBHOOK tidak ditemukan!");
-  process.exit(1);
+  process.exit(1); // Keluar jika tidak ada webhook
 }
 
 // Deteksi apakah running di Koyeb
@@ -56,9 +56,13 @@ const executablePath = process.env.CHROME_BIN || "/usr/bin/chromium-browser"; //
         waitForLogin: true, // Tunggu login sebelum lanjut
       })
       .then((client) => start(client))
-      .catch((error) => console.log("❌ ERROR:", error));
+      .catch((error) => {
+        console.error("❌ ERROR:", error);
+        process.exit(1); // Keluar jika Venom gagal
+      });
   } catch (error) {
     console.error("❌ ERROR Menjalankan Puppeteer:", error);
+    process.exit(1); // Keluar jika Puppeteer gagal
   }
 })();
 
@@ -109,6 +113,10 @@ async function sendToGoogleSheets(client, message) {
     console.log("✅ Balasan berhasil dikirim!");
   } catch (error) {
     console.error("❌ ERROR:", error);
+    await client.sendText(
+      message.from,
+      "❌ Terjadi kesalahan saat mencatat keluhan Anda. Silakan coba lagi nanti."
+    );
   }
 }
 
