@@ -15,6 +15,7 @@ const isKoyeb = process.env.KOYEB === "true";
 
 // Tentukan path ke executable Chromium
 const executablePath = process.env.CHROME_BIN || "/usr/bin/chromium-browser"; // Pastikan path ini benar
+console.log("🔄 Path ke Chromium:", executablePath); // Debugging path ke Chromium
 
 (async () => {
   try {
@@ -58,7 +59,7 @@ const executablePath = process.env.CHROME_BIN || "/usr/bin/chromium-browser"; //
       })
       .then((client) => start(client))
       .catch((error) => {
-        console.error("❌ ERROR:", error);
+        console.error("❌ ERROR: Gagal memulai Venom bot", error);
         process.exit(1); // Keluar jika Venom gagal
       });
   } catch (error) {
@@ -69,10 +70,10 @@ const executablePath = process.env.CHROME_BIN || "/usr/bin/chromium-browser"; //
 
 async function sendToGoogleSheets(client, message) {
   try {
-    if (!message.body.startsWith("#")) return;
+    if (!message.body.startsWith("#")) return; // Pastikan pesan diawali dengan #
 
-    const keluhanText = message.body.substring(1).trim();
-    if (!keluhanText) return;
+    const keluhanText = message.body.substring(1).trim(); // Ambil keluhan setelah #
+    if (!keluhanText) return; // Jika tidak ada keluhan, batalkan
 
     const now = new Date();
     const nomorKeluhan = `${now.getDate()}${
@@ -113,7 +114,7 @@ async function sendToGoogleSheets(client, message) {
 
     console.log("✅ Balasan berhasil dikirim!");
   } catch (error) {
-    console.error("❌ ERROR:", error);
+    console.error("❌ ERROR saat mengirim ke Google Sheets:", error);
     await client.sendText(
       message.from,
       "❌ Terjadi kesalahan saat mencatat keluhan Anda. Silakan coba lagi nanti."
