@@ -22,7 +22,7 @@ const executablePath = process.env.CHROME_BIN || "/usr/bin/chromium-browser"; //
 
     // Menjalankan browser Puppeteer
     const browser = await puppeteer.launch({
-      headless: true, // Pastikan headless "true" di Koyeb untuk performa
+      headless: true,
       executablePath,
       args: [
         "--no-sandbox",
@@ -30,6 +30,7 @@ const executablePath = process.env.CHROME_BIN || "/usr/bin/chromium-browser"; //
         "--disable-dev-shm-usage",
         "--disable-gpu",
         "--disable-software-rasterizer",
+        "--remote-debugging-port=9222", // Bisa membantu debugging
       ],
     });
 
