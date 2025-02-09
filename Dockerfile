@@ -37,4 +37,4 @@ RUN apt-get update && apt-get install -y \
 COPY . .
 
 # Jalankan Bot
-CMD ["node", "/app/bot.js"]
+CMD ["node", "bot.js"]
