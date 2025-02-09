@@ -1,28 +1,22 @@
-FROM node:16-slim
+# Gunakan image yang kompatibel dengan Puppeteer
+FROM node:20
 
-# Install dependencies
-RUN apt-get update && apt-get install -y \
-  wget \
-  ca-certificates \
-  fonts-liberation \
-  libappindicator3-1 \
-  libasound2 \
-  libx11-xcb1 \
-  libxtst6 \
-  lsb-release \
-  xdg-utils \
-  chromium
+# Install dependencies untuk Puppeteer & Chrome
+RUN apt-get update && apt-get install -y wget curl unzip \
+    libnss3 libatk1.0-0 libatk-bridge2.0-0 \
+    libcups2 libxkbcommon-x11-0 libxcomposite1 \
+    libxrandr2 libgbm-dev libpangocairo-1.0-0 \
+    libasound2 libpango-1.0-0 libgtk-3-0 
 
-# Install venom-bot
+# Set working directory
 WORKDIR /app
-COPY . /app
+
+# Copy project files
+COPY package.json package-lock.json ./
 RUN npm install
 
-# Set environment variable for chromium
-ENV CHROME_BIN=/usr/bin/chromium
+# Copy seluruh project
+COPY . .
 
-# Expose port
-EXPOSE 8080
-
-# Run the bot
+# Jalankan bot
 CMD ["node", "bot.js"]
