@@ -1,4 +1,4 @@
-const puppeteer = require("puppeteer");
+const puppeteer = require("puppeteer-core");
 const venom = require("venom-bot");
 const axios = require("axios");
 require("dotenv").config();
@@ -13,8 +13,9 @@ if (!GOOGLE_SHEET_WEBHOOK) {
 // Deteksi apakah running di Koyeb
 const isKoyeb = process.env.KOYEB === "true";
 
-// Menggunakan Puppeteer default executable path
-const executablePath = puppeteer.executablePath();
+// Menentukan executablePath untuk Puppeteer, jika tidak ada, pakai default
+const executablePath =
+  puppeteer.executablePath() || "/usr/bin/chromium-browser"; // Ganti dengan path jika di Koyeb
 
 (async () => {
   try {
@@ -22,7 +23,7 @@ const executablePath = puppeteer.executablePath();
 
     // Menjalankan browser Puppeteer
     const browser = await puppeteer.launch({
-      headless: "new",
+      headless: true, // Pastikan headless "true" di Koyeb untuk performa
       executablePath,
       args: [
         "--no-sandbox",
@@ -39,7 +40,7 @@ const executablePath = puppeteer.executablePath();
     venom
       .create({
         session: "whatsapp-session",
-        headless: "new",
+        headless: true,
         browserPath: executablePath,
         browserArgs: [
           "--no-sandbox",

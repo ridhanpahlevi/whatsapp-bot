@@ -1,40 +1,34 @@
-# Gunakan Node.js versi terbaru
-FROM node:18
+FROM node:16
 
-# Set environment untuk Puppeteer
-ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
-    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
+# Install dependencies for Puppeteer
+RUN apt-get update && apt-get install -y \
+  wget \
+  ca-certificates \
+  fonts-liberation \
+  libappindicator3-1 \
+  libasound2 \
+  libatk-bridge2.0-0 \
+  libatk1.0-0 \
+  libcups2 \
+  libdbus-1-3 \
+  libgdk-pixbuf2.0-0 \
+  libnspr4 \
+  libnss3 \
+  libx11-xcb1 \
+  libxcomposite1 \
+  libxdamage1 \
+  libxrandr2 \
+  xdg-utils \
+  --no-install-recommends
 
-# Set work directory
+# Install Puppeteer
+RUN npm install puppeteer
+
+# Copy project files
+COPY . /app
+
+# Set the working directory
 WORKDIR /app
 
-# Copy package.json dulu untuk caching lebih efisien
-COPY package*.json ./
-
-# Install dependencies
-RUN npm install
-
-# Install Puppeteer dependencies
-RUN apt-get update && apt-get install -y \
-    chromium \
-    libnss3 \
-    libatk1.0-0 \
-    libx11-xcb1 \
-    libxcomposite1 \
-    libxcursor1 \
-    libxdamage1 \
-    libxext6 \
-    libxfixes3 \
-    libxi6 \
-    libxrandr2 \
-    libxrender1 \
-    libdbus-glib-1-2 \
-    libasound2 \
-    libgbm-dev \
-    && rm -rf /var/lib/apt/lists/*
-
-# Copy semua file ke container setelah install dependency
-COPY . .
-
-# Jalankan Bot
+# Start the application
 CMD ["node", "bot.js"]
