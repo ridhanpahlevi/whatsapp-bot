@@ -13,9 +13,8 @@ if (!GOOGLE_SHEET_WEBHOOK) {
 // Deteksi apakah running di Koyeb
 const isKoyeb = process.env.KOYEB === "true";
 
-// Path ke Chromium
-const executablePath =
-  process.env.CHROME_BIN || "/usr/bin/google-chrome-stable";
+// Menggunakan Puppeteer default executable path
+const executablePath = puppeteer.executablePath();
 
 (async () => {
   try {
@@ -54,6 +53,7 @@ const executablePath =
           "--use-gl=swiftshader",
         ],
         useChrome: false,
+        waitForLogin: true, // Tunggu login sebelum lanjut
       })
       .then((client) => start(client))
       .catch((error) => console.log("❌ ERROR:", error));
@@ -114,7 +114,17 @@ async function sendToGoogleSheets(client, message) {
 
 function start(client) {
   client.onMessage(async (message) => {
+    console.log("📩 Pesan diterima:", message); // Debugging
+
+    // Pastikan message.body ada dan bertipe string sebelum menggunakan startsWith
+    if (!message || !message.body || typeof message.body !== "string") {
+      console.warn("⚠️ Pesan tidak valid atau tidak memiliki body:", message);
+      return;
+    }
+
+    // Jika pesan diawali dengan "#", bot akan membalas dan mencatat
     if (message.body.startsWith("#")) {
+      await client.sendText(message.from, "✅ Keluhan Anda sedang diproses!");
       await sendToGoogleSheets(client, message);
     }
   });
