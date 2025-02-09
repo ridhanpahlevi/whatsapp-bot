@@ -13,7 +13,8 @@ const isKoyeb = process.env.KOYEB === "true"; // Deteksi jika running di Koyeb
     console.log("🔄 Menjalankan Puppeteer...");
 
     const browser = await puppeteer.launch({
-      headless: "false",
+      headless: true,
+      executablePath: process.env.CHROME_BIN || "/usr/bin/chromium-browser",
       args: [
         "--no-sandbox",
         "--disable-setuid-sandbox",
@@ -23,14 +24,14 @@ const isKoyeb = process.env.KOYEB === "true"; // Deteksi jika running di Koyeb
       ],
     });
 
-    console.log("✅ Puppeteer Siap");
-    const executablePath = puppeteer.executablePath(); // Ambil path Chromium Puppeteer
+    const browserWSEndpoint = browser.wsEndpoint();
+    console.log("✅ Puppeteer Siap:", browserWSEndpoint);
 
     venom
       .create({
         session: "whatsapp-session",
         headless: "new",
-        browserPath: executablePath, // Pakai Chromium dari Puppeteer
+        browserPath: process.env.CHROME_BIN || "/usr/bin/chromium-browser",
         browserArgs: [
           "--no-sandbox",
           "--disable-setuid-sandbox",
@@ -41,7 +42,7 @@ const isKoyeb = process.env.KOYEB === "true"; // Deteksi jika running di Koyeb
         useChrome: false, // Jangan pakai Chrome bawaan sistem
       })
       .then((client) => start(client))
-      .catch((error) => console.error("❌ ERROR Venom:", error));
+      .catch((error) => console.log("❌ ERROR:", error));
   } catch (error) {
     console.error("❌ ERROR Menjalankan Puppeteer:", error);
   }
