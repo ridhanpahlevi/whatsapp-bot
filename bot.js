@@ -1,31 +1,51 @@
 const venom = require("venom-bot");
+const puppeteer = require("puppeteer");
 const axios = require("axios");
 require("dotenv").config();
 
 const GOOGLE_SHEET_WEBHOOK =
   "https://script.google.com/macros/s/AKfycbzdpICl0zSzSi2fWiz5X5FC2oml3_TIveJCfBSmgkmyo9hIFkRSwKo2SDojghPleLCbXA/exec"; // Ganti dengan URL Apps Script
 
-// Cek apakah kita menggunakan Koyeb atau bukan
-const isKoyeb = process.env.KOYEB === "true";
+const isKoyeb = process.env.KOYEB === "true"; // Deteksi jika running di Koyeb
 
-// Buat sesi WhatsApp bot
-venom
-  .create({
-    session: "whatsapp-session",
-    headless: "new", // Pakai mode headless baru
-    browserPathExecutable: "/usr/bin/chromium-browser",
-    browserArgs: [
-      "--no-sandbox",
-      "--disable-setuid-sandbox",
-      "--disable-dev-shm-usage",
-      "--disable-gpu",
-      "--disable-software-rasterizer",
-    ],
-    useChrome: false, // Gunakan Chromium dari sistem, bukan Chrome dari Windows
-  })
+(async () => {
+  try {
+    console.log("🔄 Menjalankan Puppeteer...");
 
-  .then((client) => start(client))
-  .catch((error) => console.log("❌ ERROR:", error));
+    const browser = await puppeteer.launch({
+      headless: "false",
+      args: [
+        "--no-sandbox",
+        "--disable-setuid-sandbox",
+        "--disable-dev-shm-usage",
+        "--disable-gpu",
+        "--disable-software-rasterizer",
+      ],
+    });
+
+    console.log("✅ Puppeteer Siap");
+    const executablePath = puppeteer.executablePath(); // Ambil path Chromium Puppeteer
+
+    venom
+      .create({
+        session: "whatsapp-session",
+        headless: "new",
+        browserPath: executablePath, // Pakai Chromium dari Puppeteer
+        browserArgs: [
+          "--no-sandbox",
+          "--disable-setuid-sandbox",
+          "--disable-dev-shm-usage",
+          "--disable-gpu",
+          "--disable-software-rasterizer",
+        ],
+        useChrome: false, // Jangan pakai Chrome bawaan sistem
+      })
+      .then((client) => start(client))
+      .catch((error) => console.error("❌ ERROR Venom:", error));
+  } catch (error) {
+    console.error("❌ ERROR Menjalankan Puppeteer:", error);
+  }
+})();
 
 async function sendToGoogleSheets(client, message) {
   try {
@@ -55,7 +75,6 @@ async function sendToGoogleSheets(client, message) {
 
     console.log("📤 Data ke Google Sheets:", JSON.stringify(data));
 
-    // Kirim data ke Google Sheets
     const response = await axios.post(GOOGLE_SHEET_WEBHOOK, data, {
       headers: { "Content-Type": "application/json" },
     });
@@ -65,9 +84,6 @@ async function sendToGoogleSheets(client, message) {
     if (response.status !== 200) {
       throw new Error(`Google Sheets response error: ${response.status}`);
     }
-
-    console.log("📌 Mengirim balasan ke:", message.from);
-    console.log("📌 Mention ID:", `${senderId}@c.us`);
 
     await client.sendText(
       message.from,
@@ -80,7 +96,6 @@ async function sendToGoogleSheets(client, message) {
   }
 }
 
-// Mulai bot WhatsApp
 function start(client) {
   client.onMessage(async (message) => {
     if (message.body.startsWith("#")) {
@@ -91,7 +106,6 @@ function start(client) {
   console.log("✅ Bot is running!");
 }
 
-// Cek dan pastikan file .env sudah ada pada environment Koyeb
 if (isKoyeb) {
   console.log("🚀 Running on Koyeb Cloud...");
 } else {
